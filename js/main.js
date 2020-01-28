@@ -4,6 +4,19 @@ let restaurants,
 var newMap
 var markers = []
 
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function () {
+        console.log('Service Worker registered successfully!');
+      })
+      .catch(err =>
+        console.log(`Service Worker Error: ${err}`)
+      );
+  })
+}
+
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
@@ -73,10 +86,10 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
  */
 initMap = () => {
   self.newMap = L.map('map', {
-        center: [40.722216, -73.987501],
-        zoom: 12,
-        scrollWheelZoom: false
-      });
+    center: [40.722216, -73.987501],
+    zoom: 12,
+    scrollWheelZoom: false
+  });
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
     mapboxToken: 'pk.eyJ1IjoiYW5kcmV3aDcxNyIsImEiOiJjazU3amV6bzcwM3lsM2tvNm5qdjZtemdvIn0.NzrYDXrVrx7OqiHFAqkkQg',
     maxZoom: 18,
@@ -157,10 +170,13 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  */
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
+  li.setAttribute('tabindex', 3);
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.alt = restaurant.name;
+  image.title = restaurant.name;
   li.append(image);
 
   const name = document.createElement('h1');
@@ -191,13 +207,14 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.newMap);
     marker.on("click", onClick);
+
     function onClick() {
       window.location.href = marker.options.url;
     }
     self.markers.push(marker);
   });
 
-} 
+}
 /* addMarkersToMap = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     // Add marker to the map
@@ -208,4 +225,3 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     self.markers.push(marker);
   });
 } */
-
